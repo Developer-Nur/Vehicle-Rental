@@ -91,18 +91,64 @@ const getAllBooking = async (req: Request, res: Response) => {
     // verify role
     const validRoles = ["admin", "customer"];
     const role = String(req.user?.role).toLowerCase();
-    const isValid = validRoles.includes(role);
     const currentUserID = req.user?.id;
 
-    if (!isValid) {
+    if (!validRoles.includes(role)) {
       return res.status(403).json({
-        status: false,
+        success: false,
         message: "Forbidden access!",
       });
     }
 
     const result = await bookingService.getAllBooking();
-    console.log("all booking ", result.rows);
+    const bookings = result.rows;
+
+    let responseData;
+
+    if (role === "admin") {
+      responseData = bookings.map((booking: any) => ({
+        id: booking.id,
+        customer_id: booking.customer_id,
+        vehicle_id: booking.vehicle_id,
+        rent_start_date: booking.rent_start_date,
+        rent_end_date: booking.rent_end_date,
+        total_price: booking.total_price,
+        status: booking.status,
+        customer: booking.customer,
+        vehicle: {
+          vehicle_name: booking.vehicle.vehicle_name,
+          registration_number: booking.vehicle.registration_number,
+        },
+      }));
+
+      return res.status(200).json({
+        success: true,
+        message: "Bookings retrieved successfully",
+        data: responseData,
+      });
+    } else {
+      responseData = bookings
+        .filter((booking: any) => booking.customer_id === currentUserID)
+        .map((booking: any) => ({
+          id: booking.id,
+          vehicle_id: booking.vehicle_id,
+          rent_start_date: booking.rent_start_date,
+          rent_end_date: booking.rent_end_date,
+          total_price: booking.total_price,
+          status: booking.status,
+          vehicle: {
+            vehicle_name: booking.vehicle.vehicle_name,
+            registration_number: booking.vehicle.registration_number,
+            type: booking.vehicle.type,
+          },
+        }));
+
+      return res.status(200).json({
+        success: true,
+        message: "Your bookings retrieved successfully",
+        data: responseData,
+      });
+    }
   } catch (err: any) {
     return res.status(500).json({
       success: false,

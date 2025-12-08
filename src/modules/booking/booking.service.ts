@@ -61,11 +61,27 @@ const createBooking = async (payload: Record<string, unknown>) => {
 };
 
 const getAllBooking = async () => {
-  const result = await pool.query(` SELECT id, vehicle_name,
-    type,
-    registration_number,
-    daily_rent_price,
-    availability_status FROM vehicles`);
+  const result = await pool.query(` SELECT 
+    bookings.id,
+    bookings.customer_id,
+    bookings.vehicle_id,
+    bookings.rent_start_date,
+    bookings.rent_end_date,
+    bookings.total_price,
+    bookings.status,
+    json_build_object(
+        'name', users.name,
+        'email', users.email
+    ) AS customer,
+    json_build_object(
+        'vehicle_name', vehicles.vehicle_name,
+        'type', vehicles.type,
+        'registration_number', vehicles.registration_number
+    ) AS vehicle
+    FROM bookings
+    JOIN users ON bookings.customer_id = users.id
+    JOIN vehicles ON bookings.vehicle_id = vehicles.id;
+`);
   return result;
 };
 
