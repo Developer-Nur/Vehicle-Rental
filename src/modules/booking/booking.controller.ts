@@ -160,9 +160,10 @@ const getAllBooking = async (req: Request, res: Response) => {
 
 const updateBooking = async (req: Request, res: Response) => {
   try {
+    // verify role
     const validRoles = ["admin", "customer"];
     const role = String(req.user?.role).toLowerCase();
-    const currentUserID = req.user?.id;
+    const bookingId = req.params.bookingId!;
 
     if (!validRoles.includes(role)) {
       return res.status(403).json({
@@ -170,11 +171,28 @@ const updateBooking = async (req: Request, res: Response) => {
         message: "Forbidden access!",
       });
     }
+
+    const result = await bookingService.updateBooking(bookingId, role);
+
+    if (!result) {
+      return res.status(404).json({
+        status: false,
+        message: "Booking not found!!",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message:
+        role === "admin"
+          ? "Booking marked as returned. Vehicle is now available"
+          : "Booking cancelled successfully",
+      data: result,
+    });
   } catch (err: any) {
     return res.status(500).json({
       success: false,
       message: err.message,
-      details: err,
     });
   }
 };

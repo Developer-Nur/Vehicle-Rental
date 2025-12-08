@@ -85,9 +85,59 @@ const getAllBooking = async () => {
   return result;
 };
 
+const updateBooking = async (bookingId: string, role: string) => {
+  const findBooking = await pool.query(`SELECT * FROM bookings WHERE id = $1`, [
+    bookingId,
+  ]);
+
+  const booking = findBooking.rows[0];
+
+  if (!booking) {
+    return false;
+  }
+
+  let manualStatus = "";
+
+  if (role === "admin") {
+    manualStatus = "returned";
+  } else if (role === "customer") {
+    manualStatus = "cancelled";
+  }
+
+  const updatedTheBooking = await pool.query(
+    `UPDATE bookings 
+     SET status = $1 
+     WHERE id = $2 
+     RETURNING id, customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, status`,
+    [manualStatus, bookingId]
+  );
+
+  const updatedBooking = updatedTheBooking.rows[0];
+
+  const vehicleData = await pool.query(
+    `UPDATE vehicles 
+     SET availability_status = 'available' 
+     WHERE id = $1 
+     RETURNING availability_status`,
+    [updatedBooking.vehicle_id]
+  );
+
+  if (role === "admin") {
+    return {
+      ...updatedBooking,
+      vehicle: {
+        availability_status: vehicleData.rows[0].availability_status,
+      },
+    };
+  }
+
+  return updatedBooking;
+};
+
 export const bookingService = {
   findUser,
   findVehicle,
   createBooking,
   getAllBooking,
+  updateBooking,
 };
