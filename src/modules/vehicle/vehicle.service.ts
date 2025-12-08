@@ -32,19 +32,18 @@ const createVehicleToDB = async (payload: Record<string, unknown>) => {
 
 const getAllVehicle = async () => {
   const result = await pool.query(`
-    // SELECT id, vehicle_name,
-    // type,
-    // registration_number,
-    // daily_rent_price,
-    // availability_status FROM vehicles
+    SELECT id, vehicle_name,
+    type,
+    registration_number,
+    daily_rent_price,
+    availability_status FROM vehicles
     `);
   return result;
 };
 
 const getSingleVehicle = async (id: string) => {
   const result = await pool.query(
-    `
-      SELECT id, vehicle_name,
+    `SELECT id, vehicle_name,
       type,
       registration_number,
       daily_rent_price,
@@ -52,7 +51,7 @@ const getSingleVehicle = async (id: string) => {
       `,
     [id]
   );
-  return result; 
+  return result;
 };
 
 const updateVehicle = async (payload: Record<string, unknown>, id: string) => {

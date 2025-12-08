@@ -30,7 +30,6 @@ const createVehicleToDB = async (req: Request, res: Response) => {
 const getAllVehicle = async (req: Request, res: Response) => {
   try {
     const result = await vehicleService.getAllVehicle();
-    console.log("all vehicle", result.rows);
 
     if (result.rows.length === 0) {
       return res.status(200).json({

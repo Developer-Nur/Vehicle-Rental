@@ -158,7 +158,29 @@ const getAllBooking = async (req: Request, res: Response) => {
   }
 };
 
+const updateBooking = async (req: Request, res: Response) => {
+  try {
+    const validRoles = ["admin", "customer"];
+    const role = String(req.user?.role).toLowerCase();
+    const currentUserID = req.user?.id;
+
+    if (!validRoles.includes(role)) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden access!",
+      });
+    }
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
+    });
+  }
+};
+
 export const bookingController = {
   createBooking,
   getAllBooking,
+  updateBooking,
 };
