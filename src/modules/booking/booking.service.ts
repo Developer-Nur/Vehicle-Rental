@@ -135,8 +135,6 @@ const updateBooking = async (bookingId: string, role: string) => {
 };
 
 // auto update booking when rent_end_date is over
-
-// Auto-return expired bookings
 const autoReturnExpiredBookings = async () => {
   try {
     const today = new Date().toISOString().split("T")[0];
